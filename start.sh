@@ -5,11 +5,7 @@ if [ -z "$SERVERIP" ]; then
 fi
 
 # IPTables prerouting
-if [ -z "$SERVERPORT" -o -z "$HOSTPORT" ]; then
-  iptables -t nat -A PREROUTING -i eth0 -j DNAT --to-destination ${SERVERIP} > /dev/null 2>&1
-else
-  iptables -t nat -A PREROUTING -p tcp --dport ${HOSTPORT} -j DNAT --to-destination  ${SERVERIP}:${SERVERPORT}
-fi
+iptables -t nat -A PREROUTING -i ${HOSTDEV} -j DNAT --to-destination ${SERVERIP} > /dev/null 2>&1
 
 ## ...and check for privileged access real quickly like
 if ! [ $? -eq 0 ]; then
