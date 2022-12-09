@@ -5,7 +5,12 @@ if [ -z "$SERVERIP" ]; then
 fi
 
 # IPTables prerouting
-iptables -t nat -A PREROUTING -i ${HOSTDEV} -j DNAT --to-destination ${SERVERIP} > /dev/null 2>&1
+# PORTS=80:80,443:443 par exemple
+for PORT in `echo ${PORTS} | awk -F\, '{print $1;}'`; do
+  SPORT=`echo $PORT | awk -F: '{print $1;}'`
+  DPORT=`echo $PORT | awk -F: '{ if (NF>1) print $2; else print $1;}'`
+  iptables -t nat -A PREROUTING -i ${HOSTDEV} -p tcp --dport ${SPORT} -j DNAT --to-destination  ${SERVERIP}:${DPORT}
+}
 
 ## ...and check for privileged access real quickly like
 if ! [ $? -eq 0 ]; then
