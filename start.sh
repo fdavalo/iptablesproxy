@@ -6,7 +6,7 @@ fi
 
 # IPTables prerouting
 # PORTS=80:80,443:443 par exemple
-for PORT in `echo ${PORTS} | awk -F\, '{print $1;}'`; do
+for PORT in `echo ${PORTS} | awk '{for (i=1;i<=NF;i++) print $(i);}'`; do
   SPORT=`echo $PORT | awk -F: '{print $1;}'`
   DPORT=`echo $PORT | awk -F: '{ if (NF>1) print $2; else print $1;}'`
   iptables -t nat -A PREROUTING -i ${HOSTDEV} -p tcp --dport ${SPORT} -j DNAT --to-destination  ${SERVERIP}:${DPORT}
