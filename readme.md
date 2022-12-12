@@ -2,15 +2,41 @@
 
 IPTablesProxy is a quick invention using iptables allowing proxying of external services. By default, it will proxy any traffic it receives. To run it on its own:
 
-```bash
-$ docker run -it --rm -e SERVERIP='172.217.9.46' --cap-add=NET_ADMIN -p 8080:80 soarinferret/iptablesproxy
+```yaml
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: proxy1
+  namespace: openshift-ingress
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: proxy1
+  template:
+    metadata:
+      labels:
+        app: proxy1
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[{ "name": "macvlan-1085" }]'
+    spec:
+      containers:
+        - name: container
+          env:
+            - name: HOSTDEV
+              value: net1
+            - name: SERVERIP
+              value: 172.30.66.213
+            - name: PORTS
+              value: '80,443'
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+            privileged: true
+          image: 'quay.io/fdavalo/iptablesproxy:v2'
 ```
 
-Optionally, you can define `SERVERIP` and `HOSTDEV`and `PORTS` to specify a specific TCP port mapping.
-
-```bash
-$ docker run -it --rm -e SERVERIP='172.217.9.46' -e SERVERPORT='3200' -e HOSTPORT='80' --cap-add=NET_ADMIN -p 8080:80 soarinferret/iptablesproxy
-```
 
 ## Env Options
 
